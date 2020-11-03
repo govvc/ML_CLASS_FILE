@@ -21,34 +21,29 @@ class logistic:
         self.y = y
 
     def sigmoid(self, z):
+        
         return 1 / (1 + np.exp(z))
 
     def fit(self):
-        """
-        train the dataset
-        """
-
-        x = np.insert(self.X, 0, 1, axis=1)
+     
+        x = np.insert(self.X, 0, 1, axis=1) # add bias unit
         np.random.seed(4)
         self.loss = []
         self.theta = []
         w = np.random.rand(x.shape[1])
 
         for i in range(0, self.epochs):
-            h = self.sigmoid(np.dot(x, w.T))
+            h = self.sigmoid(np.dot(x, w.T))    # compute the hypothethis value
             J = np.sum(np.dot(self.y, np.log(h)) + np.dot(1 - self.y, np.log(1 - h)))
 
-            # print('---------------------\n', -J)
-            w = w - self.lr * np.dot(self.y - h, x)
+            print('---------------------\n', -J) # output J the loss
+            w = w - self.lr * np.dot(self.y - h, x) # update weight
 
             self.loss.append(-J)
             self.theta.append(w)
 
     def predict(self, x, y):
-        """
-        :return: prediction
-        """
-
+ 
         predict_, ac_ = [], []
         for i in range(self.epochs):
             h = self.sigmoid(np.dot(x, self.theta[i]))
@@ -59,7 +54,7 @@ class logistic:
                 else:
                     predict_.append(0)
 
-            ac_.append(np.sum(predict_ == y) / len(predict_))
+            ac_.append(np.sum(predict_ == y) / len(predict_))   # add a new accuracy value to the list
 
             predict_.clear()
 
@@ -98,17 +93,19 @@ if __name__ == '__main__':
     axes[2].set_ylabel('X2')
     axes[2].set_title('Classify')
 
-    epochs = np.arange(0, log.epochs, 10)
+    epochs = np.arange(0, log.epochs, 10)   # Output figures at intervals of ten
+    
     line, = axes[0].plot([], [])
 
-    scatter1 = axes[1].scatter([], [], s=4, c='b')
-    scatter2 = axes[1].scatter([], [], s=4, c='r')
+    scatter1 = axes[1].scatter([], [], s=5, c='b')
+    scatter2 = axes[1].scatter([], [], s=5, c='r')
     axes[1].legend(["training set", "test set"])
 
     scatter3 = axes[2].scatter(X_train[:, 0], X_train[:, 1], c=y_train, marker='s')
     scatter4 = axes[2].scatter(X_test[:, 0], X_test[:, 1], c=y_test, marker='^')
     axes[2].legend(["training set", "test set"])
     line0, = axes[2].plot([], [])
+    
     log.theta = np.asarray(log.theta)
 
 x = np.arange(0, 80, 0.8)
@@ -125,5 +122,5 @@ def animate(i):
 
 
 ani = animation.FuncAnimation(fig, animate, interval=1, frames=epochs, repeat=False)
-# ani.save('Logistic.gif', writer='pillow', fps=100) #save the animation
+# ani.save('Logistic.gif', writer='pillow', fps=100) # save the animation
 plt.show()
