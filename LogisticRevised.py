@@ -37,29 +37,30 @@ class logistic:
         for i in range(0, self.epochs):
             h = self.sigmoid(np.dot(x, w.T))
             J = np.sum(np.dot(self.y, np.log(h)) + np.dot(1 - self.y, np.log(1 - h)))
-            self.loss.append(-J)
-            print('---------------------\n', -J)
+
+            # print('---------------------\n', -J)
             w = w - self.lr * np.dot(self.y - h, x)
 
+            self.loss.append(-J)
             self.theta.append(w)
 
     def predict(self, x, y):
         """
-
         :return: prediction
         """
 
         predict_, ac_ = [], []
-        for i in np.arange(self.epochs):
+        for i in range(self.epochs):
             h = self.sigmoid(np.dot(x, self.theta[i]))
 
-            for i in range(len(h)):
-                if h[i] > (1 - h[i]):
+            for j in range(len(h)):
+                if h[j] > (1 - h[j]):
                     predict_.append(1)
                 else:
                     predict_.append(0)
 
             ac_.append(np.sum(predict_ == y) / len(predict_))
+
             predict_.clear()
 
         return ac_
@@ -67,7 +68,7 @@ class logistic:
 
 if __name__ == '__main__':
     X_train_1 = standardize(X_train)
-    log = logistic(0.001, 500, X_train_1, y_train)
+    log = logistic(0.001, 1000, X_train_1, y_train)
     log.fit()
 
     # Preparation for drawing
@@ -79,13 +80,13 @@ if __name__ == '__main__':
 
     fig, axes = plt.subplots(1, 3)
 
-    axes[0].set_xlim([0, 500])
-    axes[0].set_ylim([0, 80])
+    axes[0].set_xlim([0, log.epochs])
+    axes[0].set_ylim([10, 80])
     axes[0].set_xlabel('Iteration')
     axes[0].set_ylabel('Loss')
     axes[0].set_title('Loss')
 
-    axes[1].set_xlim([0, 500])
+    axes[1].set_xlim([0, log.epochs])
     axes[1].set_ylim([0.2, 1])
     axes[1].set_xlabel('Iteration')
     axes[1].set_ylabel('Accuracy')
@@ -97,7 +98,7 @@ if __name__ == '__main__':
     axes[2].set_ylabel('X2')
     axes[2].set_title('Classify')
 
-    epochs = np.arange(log.epochs)
+    epochs = np.arange(0, log.epochs, 10)
     line, = axes[0].plot([], [])
 
     scatter1 = axes[1].scatter([], [], s=4, c='b')
@@ -110,20 +111,19 @@ if __name__ == '__main__':
     line0, = axes[2].plot([], [])
     log.theta = np.asarray(log.theta)
 
-
 x = np.arange(0, 80, 0.8)
 
 
 def animate(i):
-    line.set_data(epochs[:i], log.loss[:i])  # update data
+    line.set_data(range(0,i), log.loss[:i])  # update data
 
-    scatter1.set_offsets(np.stack((epochs[:i], ac_train[:i]), axis=1))  # update data
-    scatter2.set_offsets(np.stack((epochs[:i], ac_test[:i]), axis=1))
+    scatter1.set_offsets(np.stack((range(0,i), ac_train[:i]), axis=1))  # update data
+    scatter2.set_offsets(np.stack((range(0,i), ac_test[:i]), axis=1))
 
     line0.set_data(x, -(log.theta[i][0] + log.theta[i][1] * (x - np.mean(X_train[:, 0])) / np.std(X_train[:, 0])) /
                    log.theta[i][2] * np.std(X_train[:, 1]) + np.mean(X_train[:, 1]))
 
 
-ani = animation.FuncAnimation(fig, animate, interval=1, frames=log.epochs, repeat=False)
+ani = animation.FuncAnimation(fig, animate, interval=1, frames=epochs, repeat=False)
 # ani.save('Logistic.gif', writer='pillow', fps=100) #save the animation
 plt.show()
