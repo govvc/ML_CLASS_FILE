@@ -8,7 +8,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+
 warnings.filterwarnings("ignore", category=FutureWarning)
+
 
 proList = ['contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation']
 
@@ -51,37 +53,40 @@ if __name__ == '__main__':
     test_set = extract_features(test_path)
 
     X = np.asarray(np.asmatrix(train_set))
+
     X_on_test = np.asarray(np.asmatrix(test_set))
 
     Y = X[:, -1]  # 于Y中存储标签
     X = X[:, 0:-1]  # 于X中存储特征
+    from sklearn import preprocessing
 
-    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.1, random_state=17)
+    scaler = preprocessing.StandardScaler().fit(X)
+    X = scaler.transform(X)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=17)
     y_on_test = X_on_test[:, -1]
     X_on_test = X_on_test[:, 0:-1]
+    scaler = preprocessing.StandardScaler().fit(X_on_test)
+    X_on_test = scaler.transform(X_on_test)
     saved = []
     models = []
     results = []
     names = []
 
-    models.append(('CART', DecisionTreeClassifier(max_depth=4)))
-    models.append(('SVM', SVC(C=1.0)))
+    models.append(('CART', DecisionTreeClassifier(max_depth=3)))
+    models.append(('SVM', SVC(C=1.1)))
     models.append(('GBC', GradientBoostingClassifier(n_estimators=105)))
-    models.append(("KNN", KNeighborsClassifier(n_neighbors=4, weights='uniform', algorithm='kd_tree')))
+    models.append(("KNN", KNeighborsClassifier(n_neighbors=3, weights='uniform', algorithm='kd_tree')))
 
     for name, model in models:
         model.fit(X_train, y_train)
 
         score = model.score(X_test, y_test)
+        score1=model.score(X_on_test,y_on_test)
         names.append(name)
         results.append(score * 100)
         saved.append(model)
-        print(name, score * 100)
+        print(name, score * 100,score1*100)
 
-    i = np.argmax(results)
-    print("\nmax on train set:", names[i], '  ', results[i])
 
-    GBC = GradientBoostingClassifier(n_estimators=105)
-    GBC.fit(X_train, y_train)
-    score = GBC.score(X_on_test, y_on_test)
-    print('\nGBC on test set accuracy =', score * 100)
+
